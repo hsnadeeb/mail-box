@@ -58,12 +58,19 @@ const AuthForm = () => {
         })
         .then((data) => {
           if (data) {
-            const token  = data.idToken;
+            const token = data.idToken;
             console.log('JWT (idToken):', token);
-            authCtx.login(token)
-            navigate('/');
+            authCtx.login(token);
             localStorage.setItem('token', token);
-           
+        
+            if (isLogin) {
+              // Navigate to Welcome page after successful login
+              navigate('/');
+            } else {
+              // Navigate to Login page after successful signup
+              setIsLogin(true); // Switch to login mode
+              navigate('/welcome'); // You can adjust the path as needed
+            }
           }
         });
         

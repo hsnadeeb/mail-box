@@ -1,21 +1,22 @@
-import React from 'react';
-import AuthForm from './components/auth/AuthForm';
-import { Route, Routes } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { Route, Routes, Navigate } from 'react-router-dom';
+import Login from './components/auth/Login';
+import Signup from './components/auth/Signup';
+import Welcome from './components/pages/Welcome';
+import AuthContext from './store/auth-context';
 
 function App() {
+  const authCtx = useContext(AuthContext);
+
   return (
     <Routes>
-    <div className="App">
-      <AuthForm />
-    </div>
+      {!authCtx.isLoggedIn && <Route path="/login" element={<Login />} />}
+      {authCtx.isLoggedIn && <Route path="/welcome" element={<Welcome />} />}
+      {!authCtx.isLoggedIn && <Route path="/signup" element={<Signup />} />}
+      {/* Redirect to login if the user is not logged in */}
+      {!authCtx.isLoggedIn && <Route path="*" element={<Navigate to="/login" />} />}
     </Routes>
   );
 }
-
-{/* <Routes>
-        <Route path='/' element={<HomePage />} />
-        {!authCtx.isLoggedIn && <Route path='/auth' element={<AuthPage />} />}
-        {authCtx.isLoggedIn && <Route path='/profile' element={<UserProfile />} />}
-      </Routes> */}
 
 export default App;
