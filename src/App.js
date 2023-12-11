@@ -5,6 +5,7 @@ import Signup from './components/auth/Signup';
 import Welcome from './components/pages/Welcome';
 import AuthContext from './store/auth-context';
 
+
 function App() {
   const authCtx = useContext(AuthContext);
 

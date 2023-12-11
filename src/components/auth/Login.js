@@ -16,6 +16,7 @@ const Login = ({ onSwitchMode }) => {
     event.preventDefault();
 
     const enteredEmail = emailInputRef.current.value;
+    localStorage.setItem('UserMail: ', enteredEmail);
     const enteredPassword = passwordInputRef.current.value;
 
     setIsLoading(true);
