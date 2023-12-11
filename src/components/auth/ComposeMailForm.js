@@ -11,6 +11,7 @@ const ComposeMailForm = () => {
   const [subject, setSubject] = useState("");
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
   const user = localStorage.getItem('UserMail');
+
   const handleEditorChange = (editorState) => {
     setEditorState(editorState);
   };

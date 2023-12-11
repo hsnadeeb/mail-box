@@ -14,6 +14,7 @@ export default class TextEditor extends Component {
     this.setState({
       editorState,
     });
+    this.props.onEditorStateChange(editorState);
   };
 
   render() {
@@ -29,11 +30,11 @@ export default class TextEditor extends Component {
           editorClassName="editorClassName"
           onEditorStateChange={this.onEditorStateChange}
         />
-        <textarea
-        defaultValue
-          value={draftToHtml(convertToRaw(editorState.getCurrentContent()))}
-          readOnly
-        ></textarea>
+       <textarea
+  defaultValue={draftToHtml(convertToRaw(editorState.getCurrentContent()))}
+  readOnly
+  style={{ display: 'none' }}
+></textarea>
       </div>
     );
   }
