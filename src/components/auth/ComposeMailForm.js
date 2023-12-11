@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Form, Button } from "react-bootstrap";
 import TextEditor from "../auth/TextEditor";
 import { EditorState, convertToRaw } from "draft-js";
-// import { Editor } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import draftToHtml from "draftjs-to-html";
 
@@ -27,8 +26,7 @@ const ComposeMailForm = () => {
       timestamp: new Date().toISOString(),
     };
   
-
-    fetch("https://mailbox-da34e-default-rtdb.firebaseio.com/mails.json", {
+    fetch("https://mailbox-da34e-default-rtdb.firebaseio.com/sent.json", {
       method: "POST",
       body: JSON.stringify(newMail),
       headers: {
@@ -39,7 +37,7 @@ const ComposeMailForm = () => {
         if (response.ok) {
           return response.json();
         } else {
-          throw Error("Failed to submit data");
+          throw new Error(`Failed to submit data. Status: ${response.status}`);
         }
       })
       .then((data) => {
@@ -49,7 +47,7 @@ const ComposeMailForm = () => {
         setEditorState(EditorState.createEmpty());
       })
       .catch((error) => {
-        console.error("Error:", error);
+        console.error("Error:", error.message);
       });
   };
 
