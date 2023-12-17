@@ -37,7 +37,7 @@ export const AuthContextProvider = (props) => {
     localStorage.setItem('token', token);
 
     if (!expirationTime) {
-      expirationTime = 300; // 5 minutes
+      expirationTime = 3000; // 5 minutes
     }
 
     if (expirationTime) {

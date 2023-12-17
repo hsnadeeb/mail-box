@@ -9,47 +9,65 @@ const ComposeMailForm = () => {
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
-  const user = localStorage.getItem('UserMail');
+  // const user = localStorage.getItem('UserMail');
+  const userId = localStorage.getItem('UserMail');
+  const encodedUserId = encodeURIComponent(userId);
+  const userToken = localStorage.getItem('token');
 
   const handleEditorChange = (editorState) => {
     setEditorState(editorState);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(userId);
+    console.log(userToken);
+   
   
-    const newMail = {
-      senderEmail: user,
-      receiverEmail: email,
-      subject,
-      content: draftToHtml(convertToRaw(editorState.getCurrentContent())),
-      timestamp: new Date().toISOString(),
-    };
+    try {
+      const newMail = {
+        senderEmail: userId,
+        receiverEmail: email,
+        subject,
+        content: draftToHtml(convertToRaw(editorState.getCurrentContent())),
+        timestamp: new Date().toISOString(),
+        read: false,
+      };
   
-    fetch("https://mailbox-da34e-default-rtdb.firebaseio.com/sent.json", {
-      method: "POST",
-      body: JSON.stringify(newMail),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error(`Failed to submit data. Status: ${response.status}`);
+      console.log('Request Payload:', JSON.stringify(newMail));
+  
+      const response = await fetch(
+        `https://mailbox-da34e-default-rtdb.firebaseio.com/allMails.json`,
+        // `https://mailbox-da34e-default-rtdb.firebaseio.com/users/${encodedUserId}/sent.json`,
+        {
+          method: 'POST',
+          body: JSON.stringify(newMail),
+          headers: {
+            // 'Authorization': `Bearer ${userToken}`,
+            'Content-Type': 'application/json',
+          },
         }
-      })
-      .then((data) => {
-        console.log("Data submitted successfully:", data);
-        setEmail("");
-        setSubject("");
-        setEditorState(EditorState.createEmpty());
-      })
-      .catch((error) => {
-        console.error("Error:", error.message);
-      });
+      );
+  
+      console.log('Server Response:', response);
+  
+      if (!response.ok) {
+        throw new Error(`Failed to submit data. Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      console.log('Data submitted successfully:', data);
+  
+      setEmail('');
+      setSubject('');
+      setEditorState(EditorState.createEmpty());
+    } catch (error) {
+      console.error('Error:', error.message);
+      // Provide user-friendly error message or notification
+    }
   };
+  
+  
 
   return (
     <div>

@@ -16,7 +16,7 @@ const Login = ({ onSwitchMode }) => {
     event.preventDefault();
 
     const enteredEmail = emailInputRef.current.value;
-    localStorage.setItem('UserMail: ', enteredEmail);
+    localStorage.setItem('UserMail', enteredEmail);
     const enteredPassword = passwordInputRef.current.value;
 
     setIsLoading(true);
@@ -50,6 +50,7 @@ const Login = ({ onSwitchMode }) => {
       .then((data) => {
         if (data) {
           const token = data.idToken;
+          // const userId = data.localId;
           console.log('JWT (idToken):', token);
           authCtx.login(token);
           navigate('/welcome')
