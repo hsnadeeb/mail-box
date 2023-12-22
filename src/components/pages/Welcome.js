@@ -27,9 +27,23 @@ const Welcome = () => {
     setSelectedTab(tab);
   };
 
+  const handleLogout = () => {
+    console.log('Logout button clicked');
+    
+    // Clear user authentication state
+    localStorage.removeItem('UserMail');
+    localStorage.removeItem('token');
+  
+    // Refresh the page
+    window.location.reload();
+  };
+
   return (
-    <div className="container mt-3">
+    <div className="container mt-3 ml-3 fluid">
+      <div>
       <h2>Welcome to the mailbox</h2>
+      <Button onClick={handleLogout}>Logout</Button>
+      </div>
 
       <div className="row mt-3">
         <div className="col-md-8">

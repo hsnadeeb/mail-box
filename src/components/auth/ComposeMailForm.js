@@ -4,6 +4,8 @@ import TextEditor from "../auth/TextEditor";
 import { EditorState, convertToRaw } from "draft-js";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import draftToHtml from "draftjs-to-html";
+import DOMPurify from 'dompurify';
+
 
 const ComposeMailForm = () => {
   const [email, setEmail] = useState("");
@@ -25,11 +27,17 @@ const ComposeMailForm = () => {
    
   
     try {
+
+      const sanitizedContent = DOMPurify.sanitize(
+        draftToHtml(convertToRaw(editorState.getCurrentContent()))
+      );
+
+
       const newMail = {
         senderEmail: userId,
         receiverEmail: email,
         subject,
-        content: draftToHtml(convertToRaw(editorState.getCurrentContent())),
+        content: sanitizedContent,
         timestamp: new Date().toISOString(),
         read: false,
       };

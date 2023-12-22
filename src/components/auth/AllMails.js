@@ -56,27 +56,37 @@ const AllMails = ({ type }) => {
 
   // Function to mark a message as read
   const markAsRead = async (mailId) => {
+    console.log(mailId);
+  
     try {
-      // Update the message as read in the backend (replace the URL with your API endpoint)
+      // Update the message as read in the backend
       const response = await fetch(
-        `https://mailbox-da34e-default-rtdb.firebaseio.com/markAsRead/${mailId}`,
-        // Add your API request configuration (e.g., method, headers, etc.)
+        `https://mailbox-da34e-default-rtdb.firebaseio.com/allMails/${mailId}.json`,
+        {
+          method: 'PATCH', // Use PATCH method to update specific fields
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            read: true, // Set read attribute to true
+          }),
+        }
       );
-
+  
       if (!response.ok) {
         throw new Error(`Failed to mark message as read. Status: ${response.status}`);
       }
-
+  
       // Update the local state to mark the message as read
       const updatedMails = mails.map((mail) =>
         mail.id === mailId ? { ...mail, read: true } : mail
       );
       setMails(updatedMails);
-
+  
       // Update unread count
       const unreadMessages = updatedMails.filter((mail) => !mail.read);
       setUnreadCount(unreadMessages.length);
-
+  
       // Clear selected mail when marked as read
       setSelectedMail(null);
     } catch (error) {
@@ -84,6 +94,7 @@ const AllMails = ({ type }) => {
       // Handle error, e.g., display an error message to the user
     }
   };
+  
 
   // Function to handle selecting a mail for full content view
   const selectMail = async (mailId) => {
@@ -102,8 +113,44 @@ const AllMails = ({ type }) => {
     setSelectedMail(null);
   };
 
+
+  const deleteMail = async (mailId) => {
+    try {
+      // Delete the mail from the backend
+      const response = await fetch(
+        `https://mailbox-da34e-default-rtdb.firebaseio.com/allMails/${mailId}.json`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete mail. Status: ${response.status}`);
+      }
+
+      // Update the local state to remove the deleted mail
+      const updatedMails = mails.filter((mail) => mail.id !== mailId);
+      setMails(updatedMails);
+
+      // Close the modal if the deleted mail was the selected one
+      if (selectedMail && selectedMail.id === mailId) {
+        setSelectedMail(null);
+      }
+
+      // Update unread count
+      const unreadMessages = updatedMails.filter((mail) => !mail.read);
+      setUnreadCount(unreadMessages.length);
+    } catch (error) {
+      console.error('Error deleting mail:', error.message);
+      // Handle error, e.g., display an error message to the user
+    }
+  };
+
   return (
-    <Container fluid>
+    // <Container fluid>
     <div>
       <h3>
         {type === 'inbox' ? 'Inbox' : 'Sent'}{' '}
@@ -136,6 +183,12 @@ const AllMails = ({ type }) => {
 
                     {mail.content}
                   </td>
+                  <td>
+                  <Button variant="danger" onClick={() => deleteMail(mail.id)}>
+                    Delete
+                  </Button>
+                </td>
+
                 </tr>
               ))}
             </tbody>
@@ -160,7 +213,7 @@ const AllMails = ({ type }) => {
         </div>
       )}
     </div>
-  </Container>
+  // </Container>
   );
 };
 
