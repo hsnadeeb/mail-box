@@ -6,7 +6,7 @@ const AllMails = ({ type }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [selectedMail, setSelectedMail] = useState(null);
   const user = localStorage.getItem('UserMail');
-  const userToken = localStorage.getItem('token');
+  // const userToken = localStorage.getItem('token');
 
   useEffect(() => {
     const fetchMails = async () => {
@@ -17,26 +17,27 @@ const AllMails = ({ type }) => {
         } else if (type === 'sent') {
           endpoint = `https://mailbox-da34e-default-rtdb.firebaseio.com/allMails.json?orderBy="senderEmail"&equalTo="${user}"`;
         }
-
+  
         const response = await fetch(endpoint, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
         });
-
+  
         if (!response.ok) {
           throw new Error(`Failed to fetch mails. Status: ${response.status}`);
         }
-
+  
         const data = await response.json();
-
+  
         if (data) {
           const mailArray = Object.keys(data).map((key) => ({ id: key, ...data[key] }));
           setMails(mailArray);
           // Count unread messages
           const unreadMessages = mailArray.filter((mail) => !mail.read);
           setUnreadCount(unreadMessages.length);
+          console.log('Fetched mails!!!');
         } else {
           setMails([]);
           setUnreadCount(0);
@@ -46,11 +47,17 @@ const AllMails = ({ type }) => {
         // Handle error, e.g., display an error message to the user
       }
     };
-
-    // Set a loading state while fetching
-    setMails([]);
+  
+    // Initial fetch when the component mounts
     fetchMails();
+  
+    // Set up a periodic polling to refresh data every 2 seconds
+    const intervalId = setInterval(fetchMails, 2000);
+  
+    // Clean up the interval when the component is unmounted
+    return () => clearInterval(intervalId);
   }, [user, type]);
+  
 
   
 
@@ -152,7 +159,7 @@ const AllMails = ({ type }) => {
   return (
     // <Container fluid>
     <div>
-      <h3>
+      <h3 className="mb-4">
         {type === 'inbox' ? 'Inbox' : 'Sent'}{' '}
         {unreadCount > 0 && <Badge variant="primary">{unreadCount}</Badge>}
       </h3>
@@ -160,44 +167,51 @@ const AllMails = ({ type }) => {
         <p>No mails available</p>
       ) : (
         <div>
-          <Table striped bordered hover responsive style={{ maxWidth: '100%' }}>
-            {/* Adjust the maxWidth style to make the table use the full width of the screen */}
-            <thead>
-              <tr>
-                <th>Subject</th>
-                <th>{type === 'inbox' ? 'Sender' : 'Receiver'}</th>
-                <th>Content</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mails.map((mail) => (
-                <tr
-                  key={mail.id}
-                  className={`${
-                    !mail.read ? 'table-primary font-weight-bold' : 'table-secondary'
-                  }`}
-                >
-                  <td onClick={() => selectMail(mail.id)}>{mail.subject}</td>
-                  <td>{type === 'inbox' ? mail.senderEmail : mail.receiverEmail}</td>
-                  <td style={{maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <Table striped bordered hover responsive className="table-light table-borderless">
+        <thead className="thead-light">
+          <tr>
+            <th className="text-uppercase">Subject</th>
+            <th className="text-uppercase">{type === 'inbox' ? 'Sender' : 'Receiver'}</th>
+            <th className="text-uppercase">Content</th>
+            <th className="text-uppercase">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {mails.map((mail) => (
+            <tr
+              key={mail.id}
+              className={`${
+                !mail.read ? 'table-primary font-weight-bold' : 'table-secondary'
+              }`}
+            >
+              <td onClick={() => selectMail(mail.id)}>
+  {mail.read ? (
+    <p className="mb-0">{mail.subject}</p>
+  ) : (
+    <div>
+      <p className="mb-0"><span className="mr-2" style={{ color: 'blue', fontSize: '27px' }}>&#8226;  </span>{ mail.subject}</p>
+    </div>
+  )}
+</td>
 
-                    {mail.content}
-                  </td>
-                  <td>
-                  <Button variant="danger" onClick={() => deleteMail(mail.id)}>
-                    Delete
-                  </Button>
-                </td>
-
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+              <td>{type === 'inbox' ? mail.senderEmail : mail.receiverEmail}</td>
+              <td>
+                <p className="mb-0">{mail.content}</p>
+              </td>
+              <td className="text-center">
+                <Button variant="danger" size="sm" onClick={() => deleteMail(mail.id)}>
+                  Delete
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
 
           {/* Modal for displaying full content */}
-          <Modal show={!!selectedMail} onHide={handleClose}>
+          <Modal show={!!selectedMail} onHide={handleClose} dialogClassName="custom-modal">
             <Modal.Header closeButton>
-              <Modal.Title>{selectedMail?.subject}</Modal.Title>
+              <Modal.Title>Your mail</Modal.Title>
             </Modal.Header>
             <Modal.Body>
               <p><strong>From:</strong> {selectedMail?.senderEmail}</p>

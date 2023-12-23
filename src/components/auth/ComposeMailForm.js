@@ -29,7 +29,8 @@ const ComposeMailForm = () => {
     try {
 
       const sanitizedContent = DOMPurify.sanitize(
-        draftToHtml(convertToRaw(editorState.getCurrentContent()))
+        draftToHtml(convertToRaw(editorState.getCurrentContent())),
+        { ALLOWED_TAGS: [] } 
       );
 
 
